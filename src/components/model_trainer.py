@@ -10,6 +10,7 @@ from sklearn.ensemble import (
 )
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
+from sklearn.metrics import f1_score
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
 from xgboost import XGBRegressor
@@ -112,7 +113,6 @@ class ModelTrainer:
             predicted=best_model.predict(X_test)
             r2_square = r2_score(y_test, predicted)
             logging.info(f"R2 square score : {r2_square}")
-
 
             save_object(
                 file_path=self.model_trainer_config.trained_model_file_path,
