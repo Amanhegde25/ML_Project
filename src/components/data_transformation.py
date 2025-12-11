@@ -24,8 +24,7 @@ class DataTransformation:
     def get_data_transformer_object(self):
         try:
             numerical_columns = ["writing_score", "reading_score"]
-            num_pipeline= Pipeline(
-                steps=[
+            num_pipeline= Pipeline(steps=[
                 ("imputer",SimpleImputer(strategy="median")),
                 ("scaler",StandardScaler())
                 ]
@@ -39,8 +38,7 @@ class DataTransformation:
                 "lunch",
                 "test_preparation_course",
             ]          
-            cat_pipeline=Pipeline(
-                steps=[
+            cat_pipeline=Pipeline(steps=[
                 ("imputer",SimpleImputer(strategy="most_frequent")),
                 ("one_hot_encoder",OneHotEncoder()),
                 ("scaler",StandardScaler(with_mean=False))
@@ -48,11 +46,9 @@ class DataTransformation:
             )
             logging.info(f"Categorical columns: {categorical_columns}")
 
-            preprocessor=ColumnTransformer(
-                [
+            preprocessor=ColumnTransformer([
                 ("num_pipeline",num_pipeline,numerical_columns),
                 ("cat_pipelines",cat_pipeline,categorical_columns)
-
                 ]
             )
             return preprocessor
@@ -66,27 +62,25 @@ class DataTransformation:
             train_df=pd.read_csv(train_path)
             test_df=pd.read_csv(test_path)
             logging.info("Read train and test data completed")
+            
+            #drop target column from train and test dataframe
+            target_column_name="math_score"
+            input_feature_train_df=train_df.drop(columns=[target_column_name],axis=1)
+            input_feature_test_df=test_df.drop(columns=[target_column_name],axis=1)
+
+            target_feature_train_df=train_df[target_column_name]
+            target_feature_test_df=test_df[target_column_name]
+            logging.info(f"After dropping target column shapes: {input_feature_train_df.shape}, {input_feature_test_df.shape}")
 
             logging.info("Obtaining preprocessing object")
             preprocessing_obj=self.get_data_transformer_object()
-            target_column_name="math_score"
-
-            input_feature_train_df=train_df.drop(columns=[target_column_name],axis=1)
-            target_feature_train_df=train_df[target_column_name]
-            
-            input_feature_test_df=test_df.drop(columns=[target_column_name],axis=1)
-            target_feature_test_df=test_df[target_column_name]
-
-            logging.info( f"Applying preprocessing object on training dataframe and testing dataframe." )
+            logging.info( f"Applying preprocessing object on training df and testing df." )
             input_feature_train_arr=preprocessing_obj.fit_transform(input_feature_train_df)
             input_feature_test_arr=preprocessing_obj.transform(input_feature_test_df)
-
             train_arr = np.c_[
                 input_feature_train_arr, np.array(target_feature_train_df)
             ]
             test_arr = np.c_[input_feature_test_arr, np.array(target_feature_test_df)]
-
-            logging.info(f"Saved preprocessing object.")
 
             save_object(
                 file_path=self.data_transformation_config.preprocessor_obj_file_path,
