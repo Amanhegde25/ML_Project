@@ -135,8 +135,6 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.logs/
-*.log
 notepad.txt
 .env
 .envrc
