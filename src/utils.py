@@ -31,16 +31,7 @@ def evaluate_models(X_train, y_train, X_test, y_test, models, param):
 
             logging.info(f"{name}")
             if param_grid:
-                gs = GridSearchCV(
-                    estimator=model,
-                    param_grid=param_grid,
-                    cv=3,
-                    scoring='r2',
-                    n_jobs=-1,
-                    refit=True,
-                    verbose=0,
-                    error_score='raise'
-                )
+                gs = GridSearchCV(estimator=model,param_grid=param_grid,cv=3,scoring='r2',n_jobs=-1,refit=True,verbose=0,error_score='raise')
                 gs.fit(X_train, y_train)
                 best_model = gs.best_estimator_
                 logging.info(f"Best params: {gs.best_params_}")

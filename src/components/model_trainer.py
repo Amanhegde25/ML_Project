@@ -4,7 +4,6 @@ from src.logger import logging
 from src.obj_locations import obj_locations
 from src.utils import save_object,evaluate_models,evaluate_models_notuning
 
-from catboost import CatBoostRegressor # type: ignore
 from sklearn.ensemble import ( # type: ignore
     AdaBoostRegressor,
     GradientBoostingRegressor,
@@ -38,7 +37,6 @@ class ModelTrainer:
                 "Gradient Boosting": GradientBoostingRegressor(),
                 "Linear Regression": LinearRegression(),
                 "XGBRegressor": XGBRegressor(),
-                "CatBoosting Regressor": CatBoostRegressor(verbose=False),
                 "AdaBoost Regressor": AdaBoostRegressor(),
                 "KNN Regressor": KNeighborsRegressor()
             }
@@ -65,11 +63,6 @@ class ModelTrainer:
                 "XGBRegressor":{
                     'learning_rate':[.1,.01,.05,.001],
                     'n_estimators': [8,16,32,64,128,256]
-                },
-                "CatBoosting Regressor":{
-                    'depth': [6,8,10],
-                    'learning_rate': [0.01, 0.05, 0.1],
-                    'iterations': [30, 50, 100]
                 },
                 "AdaBoost Regressor":{
                     'learning_rate':[.1,.01,0.5,.001],
