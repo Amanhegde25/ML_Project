@@ -1,42 +1,37 @@
-import os
 import sys
-from dataclasses import dataclass
+from src.exception import CustomException
+from src.logger import logging
+from src.obj_locations import obj_locations
+from src.utils import save_object,evaluate_models,evaluate_models_notuning
 
 from catboost import CatBoostRegressor # type: ignore
-from sklearn.ensemble import (
+from sklearn.ensemble import ( # type: ignore
     AdaBoostRegressor,
     GradientBoostingRegressor,
     RandomForestRegressor,
 )
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score
-from sklearn.metrics import f1_score
-from sklearn.neighbors import KNeighborsRegressor
-from sklearn.tree import DecisionTreeRegressor
-from xgboost import XGBRegressor
+from sklearn.linear_model import LinearRegression # type: ignore
+from sklearn.metrics import r2_score # type: ignore
+from sklearn.neighbors import KNeighborsRegressor # type: ignore
+from sklearn.tree import DecisionTreeRegressor # type: ignore
+from xgboost import XGBRegressor # type: ignore
 
-from src.exception import CustomException
-from src.logger import logging
 
-from src.utils import save_object,evaluate_models,evaluate_models_notuning
-
-@dataclass
-class ModelTrainerConfig:
-    trained_model_file_path=os.path.join("artifacts","model.pkl")
 
 class ModelTrainer:
     def __init__(self):
-        self.model_trainer_config=ModelTrainerConfig()
+        self.model_trainer_config=obj_locations()
 
     def initiate_model_trainer(self,train_array,test_array):
         try:
-            logging.info("Split training and test data into x and Y")
             X_train,y_train,X_test,y_test=(
                 train_array[:,:-1],
                 train_array[:,-1],
                 test_array[:,:-1],
                 test_array[:,-1]
             )
+            logging.info("Split data into X_train,y_train,X_test,y_test")
+
             models = {
                 "Random Forest": RandomForestRegressor(),
                 "Decision Tree": DecisionTreeRegressor(),
@@ -45,26 +40,8 @@ class ModelTrainer:
                 "XGBRegressor": XGBRegressor(),
                 "CatBoosting Regressor": CatBoostRegressor(verbose=False),
                 "AdaBoost Regressor": AdaBoostRegressor(),
+                "KNN Regressor": KNeighborsRegressor()
             }
-            #initial model evaluation without hyperparameter tuning
-            logging.info("initial model evaluation without hyperparameter tuning")
-            model_reports:dict=evaluate_models_notuning(X_train=X_train,y_train=y_train,X_test=X_test,y_test=y_test,
-                                             models=models)
-            best_model_score = max(sorted(model_reports.values()))
-            best_model_name = list(model_reports.keys())[
-                list(model_reports.values()).index(best_model_score)
-            ]
-            best_model = models[best_model_name]
-            if best_model_score<0.6:
-                raise CustomException("No best model found")
-            logging.info(f"Best found model : {best_model_name}")
-            predicted=best_model.predict(X_test)
-            r2_square = r2_score(y_test, predicted)
-            logging.info(f"R2 square score : {r2_square}")
-            
-            
-            # hyperparameter tuning
-            logging.info("With Hyperparameter tuning")
             params={
                 "Decision Tree": {
                     'criterion':['squared_error', 'friedman_mse', 'absolute_error', 'poisson'],
@@ -98,8 +75,33 @@ class ModelTrainer:
                     'learning_rate':[.1,.01,0.5,.001],
                     # 'loss':['linear','square','exponential'],
                     'n_estimators': [8,16,32,64,128,256]
+                },
+                "KNN Regressor":{
+                    'n_neighbors':[3,5,7,9,11],
+                    'weights':['uniform','distance'],
+                    'algorithm':['auto','ball_tree','kd_tree']
                 }
             }
+            
+            #initial model evaluation without hyperparameter tuning
+            logging.info("initial model evaluation without hyperparameter tuning")
+            model_reports:dict=evaluate_models_notuning(X_train=X_train,y_train=y_train,X_test=X_test,y_test=y_test,
+                                             models=models)
+            best_model_score = max(sorted(model_reports.values()))
+            best_model_name = list(model_reports.keys())[
+                list(model_reports.values()).index(best_model_score)
+            ]
+            best_model = models[best_model_name]
+            if best_model_score<0.6:
+                raise CustomException("No best model found")
+            logging.info(f"Best found model : {best_model_name}")
+            predicted=best_model.predict(X_test)
+            r2_square = r2_score(y_test, predicted)
+            logging.info(f"R2 square score : {r2_square}")
+            
+            
+            # hyperparameter tuning
+            logging.info("Model evaluation with Hyperparameter tuning")
             model_report:dict=evaluate_models(X_train=X_train,y_train=y_train,X_test=X_test,y_test=y_test,
                                              models=models,param=params)
             best_model_score = max(sorted(model_report.values()))

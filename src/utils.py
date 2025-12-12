@@ -2,10 +2,11 @@ import os
 import sys
 import pickle
 from src.logger import logging
-from sklearn.metrics import r2_score
-from sklearn.model_selection import GridSearchCV
-from sklearn.base import clone
 from src.exception import CustomException
+
+from sklearn.metrics import r2_score # type: ignore
+from sklearn.model_selection import GridSearchCV # type: ignore
+from sklearn.base import clone # type: ignore
 
 def save_object(file_path, obj):
     try:
@@ -14,7 +15,6 @@ def save_object(file_path, obj):
         with open(file_path, "wb") as file_obj:
             pickle.dump(obj, file_obj)
         logging.info(f"Object saved successfully at {file_path}")
-
     except Exception as e:
         raise CustomException(e, sys)
     
@@ -29,8 +29,7 @@ def evaluate_models(X_train, y_train, X_test, y_test, models, param):
             model = model_objs[i]
             param_grid = param.get(name, {})
 
-            logging.info(f"Evaluating model: {name}")
-
+            logging.info(f"{name}")
             if param_grid:
                 gs = GridSearchCV(
                     estimator=model,
@@ -43,9 +42,8 @@ def evaluate_models(X_train, y_train, X_test, y_test, models, param):
                     error_score='raise'
                 )
                 gs.fit(X_train, y_train)
-
                 best_model = gs.best_estimator_
-                logging.info(f"{name} - Best params: {gs.best_params_}")
+                logging.info(f"Best params: {gs.best_params_}")
 
             else:
                 best_model = clone(model)
@@ -60,7 +58,7 @@ def evaluate_models(X_train, y_train, X_test, y_test, models, param):
             test_model_score = r2_score(y_test, y_test_pred)
 
             report[name] = test_model_score
-            logging.info(f"{name}: Train Score: {train_model_score} Test Score: {test_model_score}")
+            logging.info(f"Train Score: {train_model_score} Test Score: {test_model_score}")
 
         return report
 
@@ -82,5 +80,12 @@ def evaluate_models_notuning(X_train, y_train, X_test, y_test, models):
             logging.info(f"{name}: Train Score: {train_model_score} Test Score: {test_model_score}")
         return report
 
+    except Exception as e:
+        raise CustomException(e, sys)
+
+def load_object(file_path):
+    try:
+        with open(file_path, "rb") as file_obj:
+            return pickle.load(file_obj)
     except Exception as e:
         raise CustomException(e, sys)
