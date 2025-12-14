@@ -18,20 +18,20 @@
     it will run the app on [http//localhost:5000](http://localhost:5000/predictdata)
 
 # File Structure 
-ML_Project/
-├── logs/
-├── artifacts/
-├── notebook/
-├── src/
-├── templates/
-├── .gitignore
-├── README.md
-├── app.py
-├── main.py
-├── requirements.txt
-├── setup.py
-
-Directory & File Explanations
+    ML_Project/
+    ├── logs/
+    ├── artifacts/
+    ├── notebook/
+    ├── src/
+    ├── templates/
+    ├── .gitignore
+    ├── README.md
+    ├── app.py
+    ├── main.py
+    ├── requirements.txt
+    ├── setup.py
+    
+    Directory & File Explanations
 
 # logs/
     all the logs are created here for checking the progress of the code and trobolshooting
