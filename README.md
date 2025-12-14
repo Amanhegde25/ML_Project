@@ -1,4 +1,4 @@
-## Student Exam Performance Pridictor - ML Project
+## Student Exam Performance Predictor - ML Project
 
 # For a Separate environment
     create env : conda create -p venv python=3.12 -y
